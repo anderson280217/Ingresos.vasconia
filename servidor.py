@@ -1,4 +1,4 @@
-# servidor.py - VERSIÓN PARA NUBE (RENDER) Y LOCAL
+# servidor.py - VERSIÓN CORREGIDA PARA RENDER Y LOCAL
 import os
 import sys
 import socket
@@ -6,22 +6,22 @@ from datetime import datetime, date, timedelta
 from flask import Flask, render_template, request, jsonify, send_file, send_from_directory, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from functools import wraps
-import pandas as pd
 from io import BytesIO
+
+# Importar pandas de forma segura (para evitar errores si no está instalado)
+try:
+    import pandas as pd
+    PANDAS_DISPONIBLE = True
+except ImportError:
+    PANDAS_DISPONIBLE = False
+    print("⚠️ ADVERTENCIA: pandas no está instalado")
 
 # ========== CONFIGURACIÓN PARA RENDER (NUBE) VS LOCAL ==========
 # Detectar si estamos en Render (nube)
 ES_RENDER = os.environ.get('RENDER') or os.environ.get('DATABASE_URL')
 
-# Configuración de carpetas
-if getattr(sys, 'frozen', False):
-    # Si es ejecutable compilado
-    base_path = sys._MEIPASS
-    template_folder = os.path.join(base_path, 'templates')
-    static_folder = os.path.join(base_path, 'static')
-    app = Flask(__name__, template_folder=template_folder, static_folder=static_folder)
-else:
-    app = Flask(__name__)
+# Crear la aplicación Flask
+app = Flask(__name__)
 
 # Configuración de la base de datos - DETECCIÓN AUTOMÁTICA
 if ES_RENDER:
@@ -37,16 +37,21 @@ else:
     print("💻 EJECUTANDO EN LOCAL")
     print(f"📁 Base de datos en: {RUTA_FIJA_DB}")
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + RUTA_FIJA_DB
+# Configurar la base de datos
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{RUTA_FIJA_DB}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Crear carpetas necesarias
-os.makedirs(os.path.join(base_dir, 'templates'), exist_ok=True)
-os.makedirs(os.path.join(base_dir, 'static', 'logos'), exist_ok=True)
-os.makedirs(os.path.join(base_dir, 'static', 'img'), exist_ok=True)
-os.makedirs(os.path.join(base_dir, 'fotos'), exist_ok=True)
-os.makedirs(os.path.join(base_dir, 'backups'), exist_ok=True)
+# Crear carpetas necesarias (solo si es necesario, con try/except para evitar errores en Render)
+try:
+    os.makedirs(os.path.join(base_dir, 'templates'), exist_ok=True)
+    os.makedirs(os.path.join(base_dir, 'static', 'logos'), exist_ok=True)
+    os.makedirs(os.path.join(base_dir, 'static', 'img'), exist_ok=True)
+    os.makedirs(os.path.join(base_dir, 'fotos'), exist_ok=True)
+    os.makedirs(os.path.join(base_dir, 'backups'), exist_ok=True)
+except Exception as e:
+    print(f"⚠️ No se pudieron crear algunas carpetas: {e}")
 
+# Inicializar SQLAlchemy
 db = SQLAlchemy(app)
 
 # ==================== MODELO PARA CONTRASEÑA ====================
@@ -132,16 +137,19 @@ class MovimientoMaterial(db.Model):
     destino = db.Column(db.String(200))
     timestamp = db.Column(db.Float)
 
-# Crear tablas y contraseña por defecto
+# Crear tablas y contraseña por defecto (esto debe ejecutarse dentro del contexto de la app)
 with app.app_context():
-    db.create_all()
-    pwd = Configuracion.query.filter_by(clave='password').first()
-    if not pwd:
-        pwd = Configuracion(clave='password', valor='vasconia2026')
-        db.session.add(pwd)
-        db.session.commit()
-    print("✅ Base de datos creada/verificada")
-    print(f"📁 Base de datos: {RUTA_FIJA_DB}")
+    try:
+        db.create_all()
+        pwd = Configuracion.query.filter_by(clave='password').first()
+        if not pwd:
+            pwd = Configuracion(clave='password', valor='vasconia2026')
+            db.session.add(pwd)
+            db.session.commit()
+        print("✅ Base de datos creada/verificada")
+        print(f"📁 Base de datos: {RUTA_FIJA_DB}")
+    except Exception as e:
+        print(f"❌ Error al crear la base de datos: {e}")
 
 # ==================== FUNCIONES AUXILIARES ====================
 def calcular_estado_y_dias(fin_vigencia):
@@ -753,8 +761,9 @@ def eliminar_movimiento_material():
 # ==================== API EXPORTAR A EXCEL ====================
 @app.route('/api/exportar_excel/<tipo>', methods=['GET'])
 def exportar_excel(tipo):
-    import pandas as pd
-    from io import BytesIO
+    if not PANDAS_DISPONIBLE:
+        return jsonify({'error': 'Pandas no disponible'}), 500
+    
     output = BytesIO()
     if tipo == 'personal' or tipo == 'todos':
         personal_data = []
@@ -814,8 +823,9 @@ def exportar_excel(tipo):
 # ==================== API EXPORTAR MOVIMIENTOS ====================
 @app.route('/api/exportar_movimientos/<tipo>', methods=['GET'])
 def exportar_movimientos(tipo):
-    import pandas as pd
-    from io import BytesIO
+    if not PANDAS_DISPONIBLE:
+        return jsonify({'error': 'Pandas no disponible'}), 500
+    
     output = BytesIO()
     if tipo == 'personal':
         movs = MovimientoPersonal.query.order_by(MovimientoPersonal.timestamp.desc()).limit(1000).all()
@@ -859,8 +869,11 @@ def subir_foto():
     foto = request.files['foto']
     doc = request.form.get('documento', '')
     if foto and doc:
-        foto.save(os.path.join(base_dir, 'fotos', f"{doc}.jpg"))
-        return jsonify({'exito': True})
+        try:
+            foto.save(os.path.join(base_dir, 'fotos', f"{doc}.jpg"))
+            return jsonify({'exito': True})
+        except:
+            return jsonify({'exito': False})
     return jsonify({'exito': False})
 
 @app.route('/api/ver_foto/<documento>')
