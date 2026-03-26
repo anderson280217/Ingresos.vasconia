@@ -1,4 +1,4 @@
-# servidor.py - VERSIÓN COMPLETA (SOLO MOVIMIENTOS INGRESO/SALIDA)
+# servidor.py - VERSIÓN PARA NUBE (RENDER) Y LOCAL
 import os
 import sys
 import socket
@@ -9,8 +9,13 @@ from functools import wraps
 import pandas as pd
 from io import BytesIO
 
-# Configuración para cuando es .exe
+# ========== CONFIGURACIÓN PARA RENDER (NUBE) VS LOCAL ==========
+# Detectar si estamos en Render (nube)
+ES_RENDER = os.environ.get('RENDER') or os.environ.get('DATABASE_URL')
+
+# Configuración de carpetas
 if getattr(sys, 'frozen', False):
+    # Si es ejecutable compilado
     base_path = sys._MEIPASS
     template_folder = os.path.join(base_path, 'templates')
     static_folder = os.path.join(base_path, 'static')
@@ -18,17 +23,24 @@ if getattr(sys, 'frozen', False):
 else:
     app = Flask(__name__)
 
-# Configuración de la base de datos - RUTA FIJA ABSOLUTA
-RUTA_FIJA_DB = 'C:\\Users\\LENOVO\\Desktop\\SISTEMA_WEB_VASCONIA\\base_vasconia.db'
+# Configuración de la base de datos - DETECCIÓN AUTOMÁTICA
+if ES_RENDER:
+    # En Render: usar /tmp (carpeta temporal pero persistente mientras corre)
+    RUTA_FIJA_DB = '/tmp/base_vasconia.db'
+    base_dir = '/tmp'
+    print("🚀 EJECUTANDO EN RENDER (NUBE)")
+    print(f"📁 Base de datos en: {RUTA_FIJA_DB}")
+else:
+    # En local: usar la carpeta del proyecto
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    RUTA_FIJA_DB = os.path.join(base_dir, 'base_vasconia.db')
+    print("💻 EJECUTANDO EN LOCAL")
+    print(f"📁 Base de datos en: {RUTA_FIJA_DB}")
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + RUTA_FIJA_DB
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Crear carpetas necesarias
-if getattr(sys, 'frozen', False):
-    base_dir = os.path.dirname(sys.executable)
-else:
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-
 os.makedirs(os.path.join(base_dir, 'templates'), exist_ok=True)
 os.makedirs(os.path.join(base_dir, 'static', 'logos'), exist_ok=True)
 os.makedirs(os.path.join(base_dir, 'static', 'img'), exist_ok=True)
@@ -129,7 +141,7 @@ with app.app_context():
         db.session.add(pwd)
         db.session.commit()
     print("✅ Base de datos creada/verificada")
-    print(f"📁 Base de datos FIJA: {RUTA_FIJA_DB}")
+    print(f"📁 Base de datos: {RUTA_FIJA_DB}")
 
 # ==================== FUNCIONES AUXILIARES ====================
 def calcular_estado_y_dias(fin_vigencia):
@@ -858,34 +870,28 @@ def ver_foto(documento):
         return send_file(path)
     return '', 404
 
-# ==================== API DASHBOARD - VERSIÓN FINAL (SOLO MOVIMIENTOS INGRESO/SALIDA) ====================
+# ==================== API DASHBOARD ====================
 @app.route('/api/dashboard_completo', methods=['GET'])
 def dashboard_completo():
     hoy = datetime.now().strftime('%Y-%m-%d')
     fecha_actual = datetime.now()
     
-    # ===== OBTENER TODOS LOS MOVIMIENTOS DE HOY =====
     movimientos_hoy = MovimientoPersonal.query.filter_by(fecha=hoy).all()
     
-    # ===== PERSONAL HOY (PERSONAS QUE TUVIERON INGRESO O SALIDA HOY) =====
     personas_con_movimientos_hoy = set()
     for mov in movimientos_hoy:
         personas_con_movimientos_hoy.add(mov.documento)
     personal_hoy = len(personas_con_movimientos_hoy)
     
-    # ===== VEHÍCULOS HOY =====
     movimientos_vehiculos_hoy = MovimientoVehiculo.query.filter_by(fecha=hoy).all()
     vehiculos_con_movimientos_hoy = set()
     for mov in movimientos_vehiculos_hoy:
         vehiculos_con_movimientos_hoy.add(mov.placa)
     vehiculos_hoy = len(vehiculos_con_movimientos_hoy)
     
-    # ===== MATERIALES HOY =====
     materiales_hoy = MovimientoMaterial.query.filter_by(fecha=hoy).count()
     
-    # ===== PERSONAL DENTRO (basado en ÚLTIMO movimiento de cada persona) =====
     todas_las_personas = db.session.query(MovimientoPersonal.documento).distinct().all()
-    
     personal_activo = 0
     for (doc,) in todas_las_personas:
         ultimo_mov = MovimientoPersonal.query.filter_by(documento=doc)\
@@ -893,9 +899,7 @@ def dashboard_completo():
         if ultimo_mov and ultimo_mov.movimiento == 'INGRESO':
             personal_activo += 1
     
-    # ===== VEHÍCULOS DENTRO =====
     todos_los_vehiculos = db.session.query(MovimientoVehiculo.placa).distinct().all()
-    
     vehiculos_activo = 0
     for (placa,) in todos_los_vehiculos:
         ultimo_mov = MovimientoVehiculo.query.filter_by(placa=placa)\
@@ -903,7 +907,6 @@ def dashboard_completo():
         if ultimo_mov and ultimo_mov.movimiento == 'INGRESO':
             vehiculos_activo += 1
     
-    # ===== PERSONAL POR EMPRESA (SOLO BASADO EN MOVIMIENTOS DE HOY) =====
     empresas_dict = {}
     for mov in movimientos_hoy:
         if mov.empresa:
@@ -911,14 +914,12 @@ def dashboard_completo():
         else:
             empresas_dict['SIN EMPRESA'] = empresas_dict.get('SIN EMPRESA', 0) + 1
     
-    # Si no hay movimientos hoy, mostrar mensaje
     if not empresas_dict:
         empresas_dict = {'SIN MOVIMIENTOS HOY': 0}
     
     empresas_labels = list(empresas_dict.keys())
     empresas_datos = list(empresas_dict.values())
     
-    # ===== MOVIMIENTOS DE LA SEMANA (PERSONAS ÚNICAS POR DÍA) =====
     movimientos_diarios = []
     fechas = []
     for i in range(6, -1, -1):
@@ -930,7 +931,6 @@ def dashboard_completo():
         movimientos_diarios.append(len(personas_dia))
         fechas.append(dia)
     
-    # ===== INGRESOS VS SALIDAS DE HOY (PERSONAS ÚNICAS) =====
     ingresos_hoy = 0
     salidas_hoy = 0
     personas_ingresaron = set()
@@ -941,12 +941,11 @@ def dashboard_completo():
             if mov.documento not in personas_ingresaron:
                 ingresos_hoy += 1
                 personas_ingresaron.add(mov.documento)
-        else:  # SALIDA
+        else:
             if mov.documento not in personas_salieron:
                 salidas_hoy += 1
                 personas_salieron.add(mov.documento)
     
-    # ===== MOVIMIENTOS POR HORA (PERSONAS ÚNICAS POR HORA) =====
     movimientos_hora = []
     horas = []
     for h in range(0, 24):
@@ -960,13 +959,6 @@ def dashboard_completo():
             personas_hora.add(mov.documento)
         movimientos_hora.append(len(personas_hora))
         horas.append(f"{hora_str}:00")
-    
-    # LOG PARA VERIFICAR
-    print(f"📊 DASHBOARD - SOLO MOVIMIENTOS:")
-    print(f"   Personal con movimientos hoy: {personal_hoy}")
-    print(f"   Empresas con movimientos hoy: {empresas_dict}")
-    print(f"   Ingresos hoy (personas únicas): {ingresos_hoy}")
-    print(f"   Salidas hoy (personas únicas): {salidas_hoy}")
     
     return jsonify({
         'tarjetas': {
@@ -1013,15 +1005,20 @@ def equipos_emergencia_detalle():
 if __name__ == '__main__':
     ip = socket.gethostbyname(socket.gethostname())
     print("="*60)
-    print("🏭 SISTEMA DE CONTROL DE ACCESO - VERSIÓN FINAL")
+    print("🏭 SISTEMA DE CONTROL DE ACCESO")
+    if ES_RENDER:
+        print("🚀 Modo: NUBE (Render)")
+    else:
+        print("💻 Modo: LOCAL")
     print("="*60)
     print(f"📡 Servidor listo en:")
     print(f"   http://localhost:5001")
-    print(f"   http://{ip}:5001")
+    if not ES_RENDER:
+        print(f"   http://{ip}:5001")
     print("="*60)
     print(f"🔐 Usuario: admin")
     print(f"🔐 Contraseña: vasconia2026")
-    print(f"📊 Dashboard SOLO con movimientos INGRESO/SALIDA")
-    print(f"📊 Gráficos basados en movimientos del día")
     print("="*60)
-    app.run(host='0.0.0.0', port=5001, debug=False, threaded=True)
+    
+    port = int(os.environ.get('PORT', 5001))
+    app.run(host='0.0.0.0', port=port, debug=False, threaded=True)
