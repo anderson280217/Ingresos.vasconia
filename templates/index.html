@@ -1,0 +1,1773 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INGRESOS VASCONIA</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 95%;
+            max-width: 1400px;
+            height: 95vh;
+            display: flex;
+            overflow: hidden;
+        }
+        
+        .sidebar {
+            width: 280px;
+            background: #1a2634;
+            color: white;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .logo-area {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #34495e;
+        }
+        
+        .logo-area h1 {
+            font-size: 28px;
+            color: #ecf0f1;
+        }
+        
+        .logo-area h1 span {
+            color: #3498db;
+            display: block;
+            font-size: 16px;
+            margin-top: 5px;
+        }
+        
+        .nav-menu {
+            flex: 1;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            margin: 5px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .nav-item:hover {
+            background: #2c3e50;
+        }
+        
+        .nav-item.active {
+            background: #3498db;
+        }
+        
+        .nav-item i {
+            margin-right: 15px;
+            font-size: 20px;
+        }
+        
+        .user-info {
+            border-top: 1px solid #34495e;
+            padding-top: 20px;
+            margin-top: 20px;
+        }
+        
+        .user-info p {
+            margin: 5px 0;
+            color: #bdc3c7;
+        }
+        
+        .fecha {
+            font-size: 14px;
+        }
+        
+        .main-content {
+            flex: 1;
+            background: #f5f6fa;
+            padding: 25px;
+            overflow-y: auto;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .header h2 {
+            color: #2c3e50;
+            font-size: 24px;
+        }
+        
+        .logos {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: flex-end;
+            height: 60px;
+        }
+        
+        .logo-img {
+            height: 40px !important;
+            width: auto !important;
+            max-width: 120px !important;
+            background: white;
+            padding: 5px 10px !important;
+            border-radius: 6px !important;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            object-fit: contain;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .content-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #34495e;
+            font-weight: 500;
+            font-size: 13px;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-right: 10px;
+        }
+        
+        .btn-primary { background: #3498db; color: white; }
+        .btn-primary:hover { background: #2980b9; }
+        .btn-success { background: #27ae60; color: white; }
+        .btn-success:hover { background: #229954; }
+        .btn-danger { background: #e74c3c; color: white; }
+        .btn-danger:hover { background: #c0392b; }
+        .btn-warning { background: #f39c12; color: white; }
+        .btn-warning:hover { background: #e67e22; }
+        .btn-info { background: #00bcd4; color: white; }
+        .btn-info:hover { background: #00acc1; }
+        .btn-excel { background: #27ae60; color: white; }
+        .btn-excel:hover { background: #229954; }
+        
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        
+        .search-box input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+        
+        .status-message {
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .foto-preview {
+            width: 200px;
+            height: 200px;
+            border: 3px dashed #ccc;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            background: #f8f9fa;
+            overflow: hidden;
+        }
+        
+        .foto-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .table-container {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            background: #2c3e50;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            position: sticky;
+            top: 0;
+            font-size: 13px;
+        }
+        
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 13px;
+        }
+        
+        tr:hover {
+            background: #f5f6fa;
+        }
+        
+        .estado-vigente { 
+            color: #27ae60; 
+            font-weight: bold;
+            background: #e8f5e9;
+            padding: 3px 8px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+        
+        .estado-vencido { 
+            color: #e74c3c; 
+            font-weight: bold;
+            background: #ffebee;
+            padding: 3px 8px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+        
+        .estado-por-vencer { 
+            color: #3498db; 
+            font-weight: bold;
+            background: #e3f2fd;
+            padding: 3px 8px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+        
+        .estado-corregir { 
+            color: #9b59b6; 
+            font-weight: bold;
+            background: #f3e5f5;
+            padding: 3px 8px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+        
+        .movimiento-ingreso {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        
+        .movimiento-salida {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .stat-card h3 {
+            font-size: 14px;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+        
+        .stat-number {
+            font-size: 36px;
+            font-weight: bold;
+        }
+        
+        .graficos-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .grafico-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .grafico-card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        canvas {
+            max-height: 250px;
+            width: 100% !important;
+        }
+        
+        .action-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 12px;
+            margin: 2px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            width: 500px;
+            max-width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-content h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: flex-end;
+        }
+        
+        .btn-secondary {
+            background: #95a5a6;
+        }
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="logo-area">
+                <h1>INGRESOS<br><span>VASCONIA</span></h1>
+            </div>
+            <div class="nav-menu">
+                <div class="nav-item active" onclick="cambiarSeccion('inicio', this)"><i>🏠</i> Inicio</div>
+                <div class="nav-item" onclick="cambiarSeccion('personal', this)"><i>👤</i> Personal</div>
+                <div class="nav-item" onclick="cambiarSeccion('vehiculos', this)"><i>🚗</i> Vehículos</div>
+                <div class="nav-item" onclick="cambiarSeccion('materiales', this)"><i>📦</i> Materiales</div>
+            </div>
+            <div class="user-info">
+                <p><strong>👤 Usuario:</strong> VIGILANTE</p>
+                <p class="fecha" id="fecha-actual"></p>
+                <div style="margin-top:20px; text-align:center">
+                    <a href="/logout" style="color:#e74c3c; text-decoration:none">🔒 Cerrar Sesión</a>
+                </div>
+            </div>
+        </div>
+        <div class="main-content" id="main-content"></div>
+    </div>
+
+    <!-- MODALES PARA EDICIÓN COMPLETA -->
+    <div id="modal-editar-personal" class="modal">
+        <div class="modal-content">
+            <h3>✏️ Editar Movimiento Personal</h3>
+            <input type="hidden" id="edit-personal-id">
+            <div class="form-group">
+                <label>Fecha</label>
+                <input type="date" id="edit-personal-fecha">
+            </div>
+            <div class="form-group">
+                <label>Hora</label>
+                <input type="time" id="edit-personal-hora">
+            </div>
+            <div class="form-group">
+                <label>Movimiento</label>
+                <select id="edit-personal-movimiento">
+                    <option value="INGRESO">INGRESO</option>
+                    <option value="SALIDA">SALIDA</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Documento</label>
+                <input type="text" id="edit-personal-documento">
+            </div>
+            <div class="form-group">
+                <label>Nombre Completo</label>
+                <input type="text" id="edit-personal-nombre">
+            </div>
+            <div class="form-group">
+                <label>Empresa</label>
+                <input type="text" id="edit-personal-empresa">
+            </div>
+            <div class="form-group">
+                <label>Cargo</label>
+                <input type="text" id="edit-personal-cargo">
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-success" onclick="guardarEdicionPersonal()">💾 Guardar</button>
+                <button class="btn btn-secondary" onclick="cerrarModalPersonal()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-editar-vehiculo" class="modal">
+        <div class="modal-content">
+            <h3>✏️ Editar Movimiento Vehículo</h3>
+            <input type="hidden" id="edit-vehiculo-id">
+            <div class="form-group">
+                <label>Fecha</label>
+                <input type="date" id="edit-vehiculo-fecha">
+            </div>
+            <div class="form-group">
+                <label>Hora</label>
+                <input type="time" id="edit-vehiculo-hora">
+            </div>
+            <div class="form-group">
+                <label>Movimiento</label>
+                <select id="edit-vehiculo-movimiento">
+                    <option value="INGRESO">INGRESO</option>
+                    <option value="SALIDA">SALIDA</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Placa</label>
+                <input type="text" id="edit-vehiculo-placa" style="text-transform:uppercase">
+            </div>
+            <div class="form-group">
+                <label>Tipo Vehículo</label>
+                <input type="text" id="edit-vehiculo-tipo">
+            </div>
+            <div class="form-group">
+                <label>Modelo</label>
+                <input type="text" id="edit-vehiculo-modelo">
+            </div>
+            <div class="form-group">
+                <label>Empresa</label>
+                <input type="text" id="edit-vehiculo-empresa">
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-success" onclick="guardarEdicionVehiculo()">💾 Guardar</button>
+                <button class="btn btn-secondary" onclick="cerrarModalVehiculo()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-editar-material" class="modal">
+        <div class="modal-content">
+            <h3>✏️ Editar Movimiento Material</h3>
+            <input type="hidden" id="edit-material-id">
+            <div class="form-group">
+                <label>Fecha</label>
+                <input type="date" id="edit-material-fecha">
+            </div>
+            <div class="form-group">
+                <label>Hora</label>
+                <input type="time" id="edit-material-hora">
+            </div>
+            <div class="form-group">
+                <label>Movimiento</label>
+                <select id="edit-material-movimiento">
+                    <option value="INGRESO">INGRESO</option>
+                    <option value="SALIDA">SALIDA</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Descripción</label>
+                <input type="text" id="edit-material-descripcion">
+            </div>
+            <div class="form-group">
+                <label>Cantidad</label>
+                <input type="number" step="0.01" id="edit-material-cantidad">
+            </div>
+            <div class="form-group">
+                <label>Unidad</label>
+                <input type="text" id="edit-material-unidad">
+            </div>
+            <div class="form-group">
+                <label>Destino</label>
+                <input type="text" id="edit-material-destino">
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-success" onclick="guardarEdicionMaterial()">💾 Guardar</button>
+                <button class="btn btn-secondary" onclick="cerrarModalMaterial()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let docActual = '', placaActual = '', version = Date.now(), charts = {};
+        let ultimaTablaPersonal = '';
+        let ultimaTablaVehiculo = '';
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            actualizarFecha();
+            setInterval(actualizarFecha, 1000);
+            mostrarInicio();
+        });
+        
+        function actualizarFecha() {
+            document.getElementById('fecha-actual').innerText = new Date().toLocaleString('es-CO');
+        }
+        
+        function cambiarSeccion(s, e) {
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            e.classList.add('active');
+            if (s === 'personal') mostrarPersonal();
+            else if (s === 'vehiculos') mostrarVehiculos();
+            else if (s === 'materiales') mostrarMateriales();
+            else mostrarInicio();
+        }
+        
+        function actualizarDashboardDespuesDeAccion() {
+            setTimeout(() => {
+                cargarDashboard();
+            }, 100);
+        }
+        
+        function mostrarModalPersonal() {
+            document.getElementById('modal-editar-personal').style.display = 'flex';
+        }
+        
+        function cerrarModalPersonal() {
+            document.getElementById('modal-editar-personal').style.display = 'none';
+        }
+        
+        function mostrarModalVehiculo() {
+            document.getElementById('modal-editar-vehiculo').style.display = 'flex';
+        }
+        
+        function cerrarModalVehiculo() {
+            document.getElementById('modal-editar-vehiculo').style.display = 'none';
+        }
+        
+        function mostrarModalMaterial() {
+            document.getElementById('modal-editar-material').style.display = 'flex';
+        }
+        
+        function cerrarModalMaterial() {
+            document.getElementById('modal-editar-material').style.display = 'none';
+        }
+        
+        // ==================== INICIO ====================
+        function mostrarInicio() {
+            const html = `
+                <div class="header">
+                    <h2>🏠 DASHBOARD</h2>
+                    <div class="logos">
+                        <img src="/static/logos/cenit.png?v=${version}" class="logo-img" alt="CENIT">
+                        <img src="/static/logos/odc.png?v=${version}" class="logo-img" alt="ODC">
+                        <img src="/static/logos/ocensa.png?v=${version}" class="logo-img" alt="OCENSA">
+                    </div>
+                </div>
+                <div class="content-panel">
+                    <div class="action-bar">
+                        <button class="btn btn-info" onclick="cargarDashboard()">🔄 Actualizar</button>
+                        <button class="btn btn-excel" onclick="exportarExcel('todos')">📥 Exportar Todo</button>
+                        <button class="btn btn-excel" onclick="exportarMovimientos('personal')">📥 Movimientos Personal</button>
+                        <button class="btn btn-excel" onclick="exportarMovimientos('vehiculos')">📥 Movimientos Vehículos</button>
+                        <button class="btn btn-excel" onclick="exportarMovimientos('materiales')">📥 Movimientos Materiales</button>
+                    </div>
+                    <div class="stats-grid" id="stats-container"></div>
+                    <div class="graficos-grid" id="graficos-container"></div>
+                </div>
+            `;
+            document.getElementById('main-content').innerHTML = html;
+            cargarDashboard();
+        }
+        
+        function exportarExcel(tipo) {
+            window.location.href = `/api/exportar_excel/${tipo}`;
+        }
+        
+        function exportarMovimientos(tipo) {
+            window.location.href = `/api/exportar_movimientos/${tipo}`;
+        }
+        
+        function cargarDashboard() {
+            fetch('/api/dashboard_completo')
+                .then(r => r.json())
+                .then(d => {
+                    document.getElementById('stats-container').innerHTML = `
+                        <div class="stat-card"><h3>Personal Hoy</h3><div class="stat-number">${d.tarjetas.personal_hoy}</div></div>
+                        <div class="stat-card"><h3>Personal Dentro</h3><div class="stat-number">${d.tarjetas.personal_activo}</div></div>
+                        <div class="stat-card"><h3>Vehículos Hoy</h3><div class="stat-number">${d.tarjetas.vehiculos_hoy}</div></div>
+                        <div class="stat-card"><h3>Vehículos Dentro</h3><div class="stat-number">${d.tarjetas.vehiculos_activo}</div></div>
+                        <div class="stat-card"><h3>Materiales Hoy</h3><div class="stat-number">${d.tarjetas.materiales_hoy}</div></div>
+                    `;
+                    
+                    let g = d.graficos;
+                    
+                    // SOLO 4 GRÁFICOS - los que existen en el servidor
+                    document.getElementById('graficos-container').innerHTML = `
+                        <div class="grafico-card"><h3>Personal/Empresa</h3><canvas id="ch1"></canvas></div>
+                        <div class="grafico-card"><h3>Movimientos Semana</h3><canvas id="ch2"></canvas></div>
+                        <div class="grafico-card"><h3>Ingresos/Salidas</h3><canvas id="ch3"></canvas></div>
+                        <div class="grafico-card"><h3>Movimientos Hora</h3><canvas id="ch4"></canvas></div>
+                    `;
+                    
+                    // Destruir gráficos anteriores
+                    Object.values(charts).forEach(c => {
+                        if (c) c.destroy();
+                    });
+                    charts = {};
+                    
+                    // Gráfico 1: Personal por Empresa
+                    if (document.getElementById('ch1')) {
+                        charts.c1 = new Chart('ch1', {
+                            type: 'pie',
+                            data: {
+                                labels: g.personal_por_empresa.labels,
+                                datasets: [{ 
+                                    data: g.personal_por_empresa.datos, 
+                                    backgroundColor: ['#3498db','#2ecc71','#f1c40f','#e74c3c','#9b59b6'] 
+                                }]
+                            }
+                        });
+                    }
+                    
+                    // Gráfico 2: Movimientos Semana
+                    if (document.getElementById('ch2')) {
+                        charts.c2 = new Chart('ch2', {
+                            type: 'line',
+                            data: {
+                                labels: g.movimientos_semana.labels,
+                                datasets: [{ 
+                                    label: 'Personas', 
+                                    data: g.movimientos_semana.datos, 
+                                    borderColor: '#3498db',
+                                    backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                                    tension: 0.1
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                plugins: {
+                                    legend: {
+                                        display: false
+                                    }
+                                }
+                            }
+                        });
+                    }
+                    
+                    // Gráfico 3: Ingresos vs Salidas
+                    if (document.getElementById('ch3')) {
+                        charts.c3 = new Chart('ch3', {
+                            type: 'bar',
+                            data: {
+                                labels: g.ingresos_vs_salidas.labels,
+                                datasets: [{ 
+                                    data: g.ingresos_vs_salidas.datos, 
+                                    backgroundColor: ['#27ae60', '#e74c3c']
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                plugins: {
+                                    legend: {
+                                        display: false
+                                    }
+                                }
+                            }
+                        });
+                    }
+                    
+                    // Gráfico 4: Movimientos por Hora
+                    if (document.getElementById('ch4')) {
+                        charts.c4 = new Chart('ch4', {
+                            type: 'line',
+                            data: {
+                                labels: g.movimientos_hora.labels,
+                                datasets: [{ 
+                                    label: 'Personas', 
+                                    data: g.movimientos_hora.datos, 
+                                    borderColor: '#e74c3c',
+                                    backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                                    tension: 0.1
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                plugins: {
+                                    legend: {
+                                        display: false
+                                    }
+                                }
+                            }
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error cargando dashboard:', error);
+                });
+        }
+        
+        // ==================== PERSONAL ====================
+        function mostrarPersonal() {
+            let html = `
+                <div class="header">
+                    <h2>👤 Personal</h2>
+                    <div class="logos">
+                        <img src="/static/logos/cenit.png?v=${version}" class="logo-img"><img src="/static/logos/odc.png?v=${version}" class="logo-img"><img src="/static/logos/ocensa.png?v=${version}" class="logo-img">
+                    </div>
+                </div>
+                <div class="content-panel">
+                    <div class="action-bar">
+                        <button class="btn btn-excel" onclick="exportarExcel('personal')">📥 Exportar Personal</button>
+                        <button class="btn btn-info" onclick="verTodosMovimientosPersonalCompleto()">📋 Todos los Movimientos</button>
+                    </div>
+                    <div class="search-box">
+                        <input id="buscar-doc" placeholder="Documento..." value="${docActual}">
+                        <button class="btn btn-primary" onclick="buscarPersonal()">🔍 Buscar</button>
+                        <button class="btn btn-warning" onclick="nuevoPersonal()">🆕 Nuevo</button>
+                        <button class="btn btn-info" onclick="verTodosMovimientosPersonal()">📋 Movimientos (Actual)</button>
+                    </div>
+                    <div id="personal-status" class="status-message status-info">Ingrese documento</div>
+                    
+                    <div class="form-row">
+                        <div class="form-group"><label>Documento</label><input id="p-doc"></div>
+                        <div class="form-group"><label>Nombre</label><input id="p-nom"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Empresa</label><input id="p-emp"></div>
+                        <div class="form-group"><label>Cargo</label><input id="p-car"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Sexo</label><input id="p-sex"></div>
+                        <div class="form-group"><label>Teléfono</label><input id="p-tel"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Tel Emergencia</label><input id="p-telemer"></div>
+                        <div class="form-group"><label>Nom Emergencia</label><input id="p-nomemer"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Equipo Emergencia</label>
+                        <input id="p-equipo" placeholder="BRIGADISTA, PRIMEROS AUXILIOS...">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Inicio Vigencia</label><input type="date" id="p-ini"></div>
+                        <div class="form-group"><label>Fin Vigencia</label><input type="date" id="p-fin" onchange="calcEstadoPersonal()"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>RH</label><input id="p-rh"></div>
+                        <div class="form-group"><label>Estado</label><input id="p-est" readonly></div>
+                    </div>
+                    <div class="form-group"><label>Días</label><input id="p-dias" readonly></div>
+                    
+                    <div style="display:flex">
+                        <div>
+                            <div class="foto-preview" id="foto-preview"><span>📷 SIN FOTO</span></div>
+                            <input type="file" id="foto-input" accept="image/*" style="display:none" onchange="subirFoto(this.files[0])">
+                            <button class="btn btn-primary" onclick="document.getElementById('foto-input').click()">📸 Cargar Foto</button>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top:20px">
+                        <button class="btn btn-success" onclick="regMovPersonal('INGRESO')">✅ INGRESO</button>
+                        <button class="btn btn-danger" onclick="regMovPersonal('SALIDA')">❌ SALIDA</button>
+                        <button class="btn btn-primary" onclick="guardarPersonal()">💾 GUARDAR</button>
+                        <button class="btn btn-warning" onclick="eliminarPersonal()">🗑️ ELIMINAR</button>
+                    </div>
+                </div>
+                
+                <div class="content-panel" id="mov-panel" style="display:none">
+                    <h3>📋 Movimientos de Personal</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Hora</th>
+                                    <th>Mov</th>
+                                    <th>Documento</th>
+                                    <th>Nombre</th>
+                                    <th>Empresa</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-mov-personal"></tbody>
+                        </table>
+                    </div>
+                    <button class="btn btn-info" onclick="cerrarMovimientos()">Cerrar</button>
+                </div>
+            `;
+            document.getElementById('main-content').innerHTML = html;
+            if (docActual) {
+                document.getElementById('buscar-doc').value = docActual;
+                buscarPersonal();
+            }
+        }
+        
+        function calcEstadoPersonal() {
+            let fin = document.getElementById('p-fin').value;
+            if (!fin) return;
+            let d = Math.ceil((new Date(fin) - new Date()) / 86400000);
+            let e = '';
+            if (d > 30) e = 'VIGENTE';
+            else if (d >= 2) e = 'POR VENCER';
+            else if (d === 1) e = 'VENCE MAÑANA';
+            else if (d === 0) e = 'VENCE HOY';
+            else e = 'VENCIDO';
+            document.getElementById('p-est').value = e;
+            document.getElementById('p-dias').value = d > 0 ? d + ' DÍAS' : 'VENCIDO';
+        }
+        
+        function buscarPersonal() {
+            let doc = document.getElementById('buscar-doc').value.trim();
+            if (!doc) return alert('Ingrese documento');
+            docActual = doc;
+            mostrarEstado('personal-status', 'Buscando...', 'info');
+            
+            fetch('/api/buscar_personal', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ documento: doc })
+            })
+            .then(r => r.json())
+            .then(d => {
+                if (d.encontrado) {
+                    let p = d.datos;
+                    document.getElementById('p-doc').value = p.documento || '';
+                    document.getElementById('p-nom').value = p.nombre_completo || '';
+                    document.getElementById('p-emp').value = p.empresa || '';
+                    document.getElementById('p-car').value = p.cargo || '';
+                    document.getElementById('p-sex').value = p.sexo || '';
+                    document.getElementById('p-tel').value = p.telefono || '';
+                    document.getElementById('p-telemer').value = p.telefono_emergencia || '';
+                    document.getElementById('p-nomemer').value = p.nombre_emergencia || '';
+                    document.getElementById('p-equipo').value = p.equipo_emergencia || '';
+                    document.getElementById('p-ini').value = p.inicio_vigencia || '';
+                    document.getElementById('p-fin').value = p.fin_vigencia || '';
+                    document.getElementById('p-rh').value = p.rh || '';
+                    document.getElementById('p-est').value = p.estado || '';
+                    document.getElementById('p-dias').value = p.dias_disponibles || '';
+                    mostrarEstado('personal-status', '✅ Encontrado', 'success');
+                    cargarFoto(doc);
+                } else {
+                    limpiarPersonal();
+                    document.getElementById('p-doc').value = doc;
+                    mostrarEstado('personal-status', '❌ No encontrado', 'error');
+                }
+            });
+        }
+        
+        function nuevoPersonal() {
+            limpiarPersonal();
+            docActual = '';
+            document.getElementById('buscar-doc').value = '';
+            document.getElementById('p-doc').focus();
+            mostrarEstado('personal-status', '📝 Nuevo', 'info');
+            let p = document.getElementById('foto-preview');
+            if (p) p.innerHTML = '<span>📷 SIN FOTO</span>';
+        }
+        
+        function limpiarPersonal() {
+            ['p-doc','p-nom','p-emp','p-car','p-sex','p-tel','p-telemer','p-nomemer','p-equipo','p-ini','p-fin','p-rh','p-est','p-dias'].forEach(id => {
+                let e = document.getElementById(id);
+                if (e) e.value = '';
+            });
+        }
+        
+        function guardarPersonal() {
+            let d = {
+                documento: document.getElementById('p-doc').value,
+                nombre_completo: document.getElementById('p-nom').value,
+                empresa: document.getElementById('p-emp').value,
+                cargo: document.getElementById('p-car').value,
+                sexo: document.getElementById('p-sex').value,
+                telefono: document.getElementById('p-tel').value,
+                telefono_emergencia: document.getElementById('p-telemer').value,
+                nombre_emergencia: document.getElementById('p-nomemer').value,
+                equipo_emergencia: document.getElementById('p-equipo').value,
+                inicio_vigencia: document.getElementById('p-ini').value,
+                fin_vigencia: document.getElementById('p-fin').value,
+                rh: document.getElementById('p-rh').value
+            };
+            if (!d.documento) return alert('Documento obligatorio');
+            
+            fetch('/api/guardar_personal', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(d)
+            })
+            .then(r => r.json())
+            .then(r => {
+                if (r.exito) {
+                    mostrarEstado('personal-status', '✅ Guardado', 'success');
+                    actualizarDashboardDespuesDeAccion();
+                }
+            });
+        }
+        
+        function eliminarPersonal() {
+            let doc = document.getElementById('p-doc').value;
+            if (!doc) return;
+            if (confirm('¿Eliminar este registro?')) {
+                fetch('/api/eliminar_personal', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ documento: doc })
+                })
+                .then(r => r.json())
+                .then(r => {
+                    if (r.exito) {
+                        nuevoPersonal();
+                        mostrarEstado('personal-status', '✅ Eliminado', 'success');
+                        actualizarDashboardDespuesDeAccion();
+                    }
+                });
+            }
+        }
+        
+        function regMovPersonal(mov) {
+            let doc = document.getElementById('p-doc').value;
+            if (!doc) return alert('No hay documento');
+            
+            fetch('/api/registrar_movimiento_personal', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    documento: doc,
+                    nombre_completo: document.getElementById('p-nom').value,
+                    empresa: document.getElementById('p-emp').value,
+                    cargo: document.getElementById('p-car').value,
+                    movimiento: mov
+                })
+            })
+            .then(r => r.json())
+            .then(r => {
+                if (r.exito) {
+                    mostrarEstado('personal-status', `✅ ${mov} registrado`, 'success');
+                    actualizarDashboardDespuesDeAccion();
+                }
+            });
+        }
+        
+        function verTodosMovimientosPersonal() {
+            fetch('/api/todos_movimientos_personal')
+                .then(r => r.json())
+                .then(d => {
+                    ultimaTablaPersonal = 'personal';
+                    let t = document.getElementById('tabla-mov-personal');
+                    t.innerHTML = '';
+                    d.forEach(m => {
+                        let r = t.insertRow();
+                        r.insertCell().innerText = m.fecha;
+                        r.insertCell().innerText = m.hora;
+                        r.insertCell().innerHTML = `<span class="${m.movimiento === 'INGRESO' ? 'movimiento-ingreso' : 'movimiento-salida'}">${m.movimiento}</span>`;
+                        r.insertCell().innerText = m.documento;
+                        r.insertCell().innerText = m.nombre_completo;
+                        r.insertCell().innerText = m.empresa;
+                        
+                        let acciones = r.insertCell();
+                        acciones.innerHTML = `
+                            <button class="btn btn-small btn-info" onclick="editarMovimientoPersonalCompleto(${m.id})">✏️ Editar Todo</button>
+                            <button class="btn btn-small btn-danger" onclick="eliminarMovimientoPersonalDirecto(${m.id})">🗑️ Eliminar</button>
+                        `;
+                    });
+                    document.getElementById('mov-panel').style.display = 'block';
+                });
+        }
+        
+        function verTodosMovimientosPersonalCompleto() {
+            fetch('/api/todos_movimientos_personal_completo')
+                .then(r => r.json())
+                .then(d => {
+                    ultimaTablaPersonal = 'personal_completo';
+                    let t = document.getElementById('tabla-mov-personal');
+                    t.innerHTML = '';
+                    d.forEach(m => {
+                        let r = t.insertRow();
+                        r.insertCell().innerText = m.fecha;
+                        r.insertCell().innerText = m.hora;
+                        r.insertCell().innerHTML = `<span class="${m.movimiento === 'INGRESO' ? 'movimiento-ingreso' : 'movimiento-salida'}">${m.movimiento}</span>`;
+                        r.insertCell().innerText = m.documento;
+                        r.insertCell().innerText = m.nombre_completo;
+                        r.insertCell().innerText = m.empresa;
+                        
+                        let acciones = r.insertCell();
+                        acciones.innerHTML = `
+                            <button class="btn btn-small btn-info" onclick="editarMovimientoPersonalCompleto(${m.id})">✏️ Editar Todo</button>
+                            <button class="btn btn-small btn-danger" onclick="eliminarMovimientoPersonalDirecto(${m.id})">🗑️ Eliminar</button>
+                        `;
+                    });
+                    document.getElementById('mov-panel').style.display = 'block';
+                });
+        }
+        
+        function eliminarMovimientoPersonalDirecto(id) {
+            if (confirm('¿Está seguro de eliminar este movimiento?')) {
+                fetch('/api/eliminar_movimiento_personal', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: id })
+                })
+                .then(r => r.json())
+                .then(r => {
+                    if (r.exito) {
+                        if (ultimaTablaPersonal === 'personal_completo') {
+                            verTodosMovimientosPersonalCompleto();
+                        } else {
+                            verTodosMovimientosPersonal();
+                        }
+                        actualizarDashboardDespuesDeAccion();
+                        alert('✅ Movimiento eliminado correctamente');
+                    } else {
+                        alert('❌ Error al eliminar el movimiento');
+                    }
+                })
+                .catch(err => {
+                    alert('❌ Error de conexión');
+                });
+            }
+        }
+        
+        function editarMovimientoPersonalCompleto(id) {
+            fetch(`/api/obtener_movimiento_personal/${id}`)
+                .then(r => r.json())
+                .then(m => {
+                    if (m.error) {
+                        alert('Error al cargar el movimiento');
+                        return;
+                    }
+                    
+                    document.getElementById('edit-personal-id').value = m.id;
+                    document.getElementById('edit-personal-fecha').value = m.fecha;
+                    document.getElementById('edit-personal-hora').value = m.hora;
+                    document.getElementById('edit-personal-movimiento').value = m.movimiento;
+                    document.getElementById('edit-personal-documento').value = m.documento;
+                    document.getElementById('edit-personal-nombre').value = m.nombre_completo;
+                    document.getElementById('edit-personal-empresa').value = m.empresa;
+                    document.getElementById('edit-personal-cargo').value = m.cargo;
+                    
+                    mostrarModalPersonal();
+                });
+        }
+        
+        function guardarEdicionPersonal() {
+            let datos = {
+                id: document.getElementById('edit-personal-id').value,
+                fecha: document.getElementById('edit-personal-fecha').value,
+                hora: document.getElementById('edit-personal-hora').value,
+                movimiento: document.getElementById('edit-personal-movimiento').value,
+                documento: document.getElementById('edit-personal-documento').value,
+                nombre_completo: document.getElementById('edit-personal-nombre').value,
+                empresa: document.getElementById('edit-personal-empresa').value,
+                cargo: document.getElementById('edit-personal-cargo').value
+            };
+            
+            if (!datos.fecha || !datos.hora || !datos.documento || !datos.nombre_completo) {
+                alert('Complete los campos obligatorios');
+                return;
+            }
+            
+            fetch('/api/actualizar_movimiento_personal', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(datos)
+            })
+            .then(r => r.json())
+            .then(r => {
+                if (r.exito) {
+                    cerrarModalPersonal();
+                    if (ultimaTablaPersonal === 'personal_completo') {
+                        verTodosMovimientosPersonalCompleto();
+                    } else {
+                        verTodosMovimientosPersonal();
+                    }
+                    actualizarDashboardDespuesDeAccion();
+                    alert('✅ Movimiento actualizado correctamente');
+                } else {
+                    alert('❌ Error al actualizar');
+                }
+            });
+        }
+        
+        function cerrarMovimientos() {
+            document.getElementById('mov-panel').style.display = 'none';
+        }
+        
+        function cargarFoto(d) {
+            let p = document.getElementById('foto-preview');
+            if (!p) return;
+            p.innerHTML = `<img src="/api/ver_foto/${d}?t=${Date.now()}" onerror="this.style.display='none';this.parentNode.innerHTML='<span>📷 SIN FOTO</span>';">`;
+        }
+        
+        function subirFoto(f) {
+            let d = document.getElementById('p-doc').value;
+            if (!d) return alert('Primero guarde');
+            let fd = new FormData();
+            fd.append('foto', f);
+            fd.append('documento', d);
+            fetch('/api/subir_foto', { method: 'POST', body: fd })
+                .then(r => r.json())
+                .then(r => {
+                    if (r.exito) cargarFoto(d);
+                });
+        }
+        
+        function mostrarEstado(id, msg, t) {
+            let e = document.getElementById(id);
+            if (e) {
+                e.innerText = msg;
+                e.className = 'status-message status-' + t;
+            }
+        }
+        
+        // ==================== VEHÍCULOS ====================
+        function mostrarVehiculos() {
+            let html = `
+                <div class="header">
+                    <h2>🚗 Vehículos</h2>
+                    <div class="logos">
+                        <img src="/static/logos/cenit.png?v=${version}" class="logo-img"><img src="/static/logos/odc.png?v=${version}" class="logo-img"><img src="/static/logos/ocensa.png?v=${version}" class="logo-img">
+                    </div>
+                </div>
+                <div class="content-panel">
+                    <div class="action-bar">
+                        <button class="btn btn-excel" onclick="exportarExcel('vehiculos')">📥 Exportar Vehículos</button>
+                        <button class="btn btn-info" onclick="verTodosMovimientosVehiculoCompleto()">📋 Todos los Movimientos</button>
+                    </div>
+                    <div class="search-box">
+                        <input id="buscar-placa" placeholder="Placa..." value="${placaActual}" style="text-transform:uppercase">
+                        <button class="btn btn-primary" onclick="buscarVehiculo()">🔍 Buscar</button>
+                        <button class="btn btn-warning" onclick="nuevoVehiculo()">🆕 Nuevo</button>
+                        <button class="btn btn-info" onclick="verMovimientosVehiculo()">📋 Movimientos (Actual)</button>
+                    </div>
+                    <div id="vehiculo-status" class="status-message status-info">Ingrese placa</div>
+                    
+                    <div class="form-row">
+                        <div class="form-group"><label>Placa</label><input id="v-placa" style="text-transform:uppercase"></div>
+                        <div class="form-group"><label>Tipo</label><input id="v-tipo"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Modelo</label><input id="v-modelo"></div>
+                        <div class="form-group"><label>Ingreso</label><input id="v-ingreso"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Inicio Vigencia</label><input type="date" id="v-ini"></div>
+                        <div class="form-group"><label>Fin Vigencia</label><input type="date" id="v-fin" onchange="calcEstadoVehiculo()"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Empresa</label><input id="v-emp"></div>
+                        <div class="form-group"><label>Observaciones</label><textarea id="v-obs"></textarea></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Estado</label><input id="v-est" readonly></div>
+                        <div class="form-group"><label>Días</label><input id="v-dias" readonly></div>
+                    </div>
+                    
+                    <div style="margin-top:20px">
+                        <button class="btn btn-success" onclick="regMovVehiculo('INGRESO')">✅ INGRESO</button>
+                        <button class="btn btn-danger" onclick="regMovVehiculo('SALIDA')">❌ SALIDA</button>
+                        <button class="btn btn-primary" onclick="guardarVehiculo()">💾 GUARDAR</button>
+                        <button class="btn btn-warning" onclick="eliminarVehiculo()">🗑️ ELIMINAR</button>
+                    </div>
+                </div>
+                
+                <div class="content-panel" id="mov-vehiculo-panel" style="display:none">
+                    <h3>📋 Movimientos de Vehículos</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Hora</th>
+                                    <th>Mov</th>
+                                    <th>Placa</th>
+                                    <th>Tipo</th>
+                                    <th>Modelo</th>
+                                    <th>Empresa</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-mov-vehiculo"></tbody>
+                        </table>
+                    </div>
+                    <button class="btn btn-info" onclick="cerrarMovVehiculo()">Cerrar</button>
+                </div>
+            `;
+            document.getElementById('main-content').innerHTML = html;
+            if (placaActual) {
+                document.getElementById('buscar-placa').value = placaActual;
+                buscarVehiculo();
+            }
+        }
+        
+        function calcEstadoVehiculo() {
+            let fin = document.getElementById('v-fin').value;
+            if (!fin) return;
+            let d = Math.ceil((new Date(fin) - new Date()) / 86400000);
+            let e = '';
+            if (d > 30) e = 'VIGENTE';
+            else if (d >= 2) e = 'POR VENCER';
+            else if (d === 1) e = 'VENCE MAÑANA';
+            else if (d === 0) e = 'VENCE HOY';
+            else e = 'VENCIDO';
+            document.getElementById('v-est').value = e;
+            document.getElementById('v-dias').value = d > 0 ? d + ' DÍAS' : 'VENCIDO';
+        }
+        
+        function buscarVehiculo() {
+            let p = document.getElementById('buscar-placa').value.trim().toUpperCase();
+            if (!p) return alert('Ingrese placa');
+            placaActual = p;
+            mostrarEstado('vehiculo-status', 'Buscando...', 'info');
+            
+            fetch('/api/buscar_vehiculo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ placa: p })
+            })
+            .then(r => r.json())
+            .then(d => {
+                if (d.encontrado) {
+                    let v = d.datos;
+                    document.getElementById('v-placa').value = v.placa || '';
+                    document.getElementById('v-tipo').value = v.tipo_vehiculo || '';
+                    document.getElementById('v-modelo').value = v.modelo || '';
+                    document.getElementById('v-ingreso').value = v.ingreso || '';
+                    document.getElementById('v-ini').value = v.inicio_vigencia || '';
+                    document.getElementById('v-fin').value = v.fin_vigencia || '';
+                    document.getElementById('v-emp').value = v.empresa || '';
+                    document.getElementById('v-obs').value = v.observaciones || '';
+                    document.getElementById('v-est').value = v.estado || '';
+                    document.getElementById('v-dias').value = v.dias_disponibles || '';
+                    mostrarEstado('vehiculo-status', '✅ Encontrado', 'success');
+                } else {
+                    limpiarVehiculo();
+                    document.getElementById('v-placa').value = p;
+                    mostrarEstado('vehiculo-status', '❌ No encontrado', 'error');
+                }
+            });
+        }
+        
+        function nuevoVehiculo() {
+            limpiarVehiculo();
+            placaActual = '';
+            document.getElementById('buscar-placa').value = '';
+            document.getElementById('v-placa').focus();
+            mostrarEstado('vehiculo-status', '📝 Nuevo', 'info');
+        }
+        
+        function limpiarVehiculo() {
+            ['v-placa','v-tipo','v-modelo','v-ingreso','v-ini','v-fin','v-emp','v-obs','v-est','v-dias'].forEach(id => {
+                let e = document.getElementById(id);
+                if (e) e.value = '';
+            });
+        }
+        
+        function guardarVehiculo() {
+            let d = {
+                placa: document.getElementById('v-placa').value.toUpperCase(),
+                tipo_vehiculo: document.getElementById('v-tipo').value,
+                modelo: document.getElementById('v-modelo').value,
+                ingreso: document.getElementById('v-ingreso').value,
+                inicio_vigencia: document.getElementById('v-ini').value,
+                fin_vigencia: document.getElementById('v-fin').value,
+                empresa: document.getElementById('v-emp').value,
+                observaciones: document.getElementById('v-obs').value
+            };
+            if (!d.placa) return alert('Placa obligatoria');
+            
+            fetch('/api/guardar_vehiculo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(d)
+            })
+            .then(r => r.json())
+            .then(r => {
+                if (r.exito) {
+                    mostrarEstado('vehiculo-status', '✅ Guardado', 'success');
+                    actualizarDashboardDespuesDeAccion();
+                }
+            });
+        }
+        
+        function eliminarVehiculo() {
+            let p = document.getElementById('v-placa').value;
+            if (!p) return;
+            if (confirm('¿Eliminar este vehículo?')) {
+                fetch('/api/eliminar_vehiculo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ placa: p })
+                })
+                .then(r => r.json())
+                .then(r => {
+                    if (r.exito) {
+                        nuevoVehiculo();
+                        mostrarEstado('vehiculo-status', '✅ Eliminado', 'success');
+                        actualizarDashboardDespuesDeAccion();
+                    }
+                });
+            }
+        }
+        
+        function regMovVehiculo(mov) {
+            let p = document.getElementById('v-placa').value;
+            if (!p) return alert('No hay placa');
+            
+            fetch('/api/registrar_movimiento_vehiculo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    placa: p,
+                    tipo_vehiculo: document.getElementById('v-tipo').value,
+                    modelo: document.getElementById('v-modelo').value,
+                    empresa: document.getElementById('v-emp').value,
+                    movimiento: mov
+                })
+            })
+            .then(r => r.json())
+            .then(r => {
+                if (r.exito) {
+                    mostrarEstado('vehiculo-status', `✅ ${mov} registrado`, 'success');
+                    actualizarDashboardDespuesDeAccion();
+                }
+            });
+        }
+        
+        function verMovimientosVehiculo() {
+            let p = document.getElementById('v-placa').value;
+            if (!p) return alert('Primero busque');
+            
+            fetch('/api/movimientos_vehiculo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ placa: p })
+            })
+            .then(r => r.json())
+            .then(d => {
+                ultimaTablaVehiculo = 'vehiculo';
+                let t = document.getElementById('tabla-mov-vehiculo');
+                t.innerHTML = '';
+                d.forEach(m => {
+                    let r = t.insertRow();
+                    r.insertCell().innerText = m.fecha;
+                    r.insertCell().innerText = m.hora;
+                    r.insertCell().innerHTML = `<span class="${m.movimiento === 'INGRESO' ? 'movimiento-ingreso' : 'movimiento-salida'}">${m.movimiento}</span>`;
+                    r.insertCell().innerText = m.placa;
+                    r.insertCell().innerText = m.tipo_vehiculo;
+                    r.insertCell().innerText = m.modelo;
+                    r.insertCell().innerText = m.empresa;
+                    
+                    let acciones = r.insertCell();
+                    acciones.innerHTML = `
+                        <button class="btn btn-small btn-info" onclick="editarMovimientoVehiculoCompleto(${m.id})">✏️ Editar Todo</button>
+                        <button class="btn btn-small btn-danger" onclick="eliminarMovimientoVehiculoDirecto(${m.id})">🗑️ Eliminar</button>
+                    `;
+                });
+                document.getElementById('mov-vehiculo-panel').style.display = 'block';
+            });
+        }
+        
+        function verTodosMovimientosVehiculoCompleto() {
+            fetch('/api/todos_movimientos_vehiculo_completo')
+                .then(r => r.json())
+                .then(d => {
+                    ultimaTablaVehiculo = 'todos';
+                    let t = document.getElementById('tabla-mov-vehiculo');
+                    t.innerHTML = '';
+                    d.forEach(m => {
+                        let r = t.insertRow();
+                        r.insertCell().innerText = m.fecha;
+                        r.insertCell().innerText = m.hora;
+                        r.insertCell().innerHTML = `<span class="${m.movimiento === 'INGRESO' ? 'movimiento-ingreso' : 'movimiento-salida'}">${m.movimiento}</span>`;
+                        r.insertCell().innerText = m.placa;
+                        r.insertCell().innerText = m.tipo_vehiculo;
+                        r.insertCell().innerText = m.modelo;
+                        r.insertCell().innerText = m.empresa;
+                        
+                        let acciones = r.insertCell();
+                        acciones.innerHTML = `
+                            <button class="btn btn-small btn-info" onclick="editarMovimientoVehiculoCompleto(${m.id})">✏️ Editar Todo</button>
+                            <button class="btn btn-small btn-danger" onclick="eliminarMovimientoVehiculoDirecto(${m.id})">🗑️ Eliminar</button>
+                        `;
+                    });
+                    document.getElementById('mov-vehiculo-panel').style.display = 'block';
+                });
+        }
+        
+        function eliminarMovimientoVehiculoDirecto(id) {
+            if (confirm('¿Está seguro de eliminar este movimiento?')) {
+                fetch('/api/eliminar_movimiento_vehiculo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: id })
+                })
+                .then(r => r.json())
+                .then(r => {
+                    if (r.exito) {
+                        if (ultimaTablaVehiculo === 'todos') {
+                            verTodosMovimientosVehiculoCompleto();
+                        } else {
+                            verMovimientosVehiculo();
+                        }
+                        actualizarDashboardDespuesDeAccion();
+                        alert('✅ Movimiento eliminado correctamente');
+                    }
+                });
+            }
+        }
+        
+        function editarMovimientoVehiculoCompleto(id) {
+            fetch(`/api/obtener_movimiento_vehiculo/${id}`)
+                .then(r => r.json())
+                .then(m => {
+                    if (m.error) {
+                        alert('Error al cargar el movimiento');
+                        return;
+                    }
+                    
+                    document.getElementById('edit-vehiculo-id').value = m.id;
+                    document.getElementById('edit-vehiculo-fecha').value = m.fecha;
+                    document.getElementById('edit-vehiculo-hora').value = m.hora;
+                    document.getElementById('edit-vehiculo-movimiento').value = m.movimiento;
+                    document.getElementById('edit-vehiculo-placa').value = m.placa;
+                    document.getElementById('edit-vehiculo-tipo').value = m.tipo_vehiculo;
+                    document.getElementById('edit-vehiculo-modelo').value = m.modelo;
+                    document.getElementById('edit-vehiculo-empresa').value = m.empresa;
+                    
+                    mostrarModalVehiculo();
+                });
+        }
+        
+        function guardarEdicionVehiculo() {
+            let datos = {
+                id: document.getElementById('edit-vehiculo-id').value,
+                fecha: document.getElementById('edit-vehiculo-fecha').value,
+                hora: document.getElementById('edit-vehiculo-hora').value,
+                movimiento: document.getElementById('edit-vehiculo-movimiento').value,
+                placa: document.getElementById('edit-vehiculo-placa').value.toUpperCase(),
+                tipo_vehiculo: document.getElementById('edit-vehiculo-tipo').value,
+                modelo: document.getElementById('edit-vehiculo-modelo').value,
+                empresa: document.getElementById('edit-vehiculo-empresa').value
+            };
+            
+            if (!datos.fecha || !datos.hora || !datos.placa) {
+                alert('Complete los campos obligatorios');
+                return;
+            }
+            
+            fetch('/api/actualizar_movimiento_vehiculo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(datos)
+            })
+            .then(r => r.json())
+            .then(r => {
+                if (r.exito) {
+                    cerrarModalVehiculo();
+                    if (ultimaTablaVehiculo === 'todos') {
+                        verTodosMovimientosVehiculoCompleto();
+                    } else {
+                        verMovimientosVehiculo();
+                    }
+                    actualizarDashboardDespuesDeAccion();
+                    alert('✅ Movimiento actualizado correctamente');
+                } else {
+                    alert('❌ Error al actualizar');
+                }
+            });
+        }
+        
+        function cerrarMovVehiculo() {
+            document.getElementById('mov-vehiculo-panel').style.display = 'none';
+        }
+        
+        // ==================== MATERIALES ====================
+        function mostrarMateriales() {
+            let html = `
+                <div class="header">
+                    <h2>📦 Materiales</h2>
+                    <div class="logos">
+                        <img src="/static/logos/cenit.png?v=${version}" class="logo-img"><img src="/static/logos/odc.png?v=${version}" class="logo-img"><img src="/static/logos/ocensa.png?v=${version}" class="logo-img">
+                    </div>
+                </div>
+                <div class="content-panel">
+                    <div class="action-bar">
+                        <button class="btn btn-excel" onclick="exportarExcel('materiales')">📥 Exportar Materiales</button>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Descripción</label><input id="mat-desc"></div>
+                        <div class="form-group"><label>Cantidad</label><input type="number" id="mat-cant" step="0.01"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Unidad</label><input id="mat-und" placeholder="KILO, LITRO"></div>
+                        <div class="form-group"><label>Destino</label><input id="mat-des"></div>
+                    </div>
+                    
+                    <div style="margin:20px 0">
+                        <button class="btn btn-success" onclick="regMaterial('INGRESO')">✅ INGRESO</button>
+                        <button class="btn btn-danger" onclick="regMaterial('SALIDA')">❌ SALIDA</button>
+                        <button class="btn btn-info" onclick="cargarMateriales()">📋 Ver Todos</button>
+                    </div>
+                    
+                    <h3>📋 Últimos Movimientos</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Hora</th>
+                                    <th>Mov</th>
+                                    <th>Descripción</th>
+                                    <th>Cantidad</th>
+                                    <th>Unidad</th>
+                                    <th>Destino</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-materiales"></tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            document.getElementById('main-content').innerHTML = html;
+            cargarMateriales();
+        }
+        
+        function regMaterial(mov) {
+            let d = {
+                descripcion: document.getElementById('mat-desc').value,
+                cantidad: document.getElementById('mat-cant').value,
+                unidad: document.getElementById('mat-und').value,
+                destino: document.getElementById('mat-des').value,
+                movimiento: mov
+            };
+            if (!d.descripcion) return alert('Descripción obligatoria');
+            
+            fetch('/api/registrar_movimiento_material', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(d)
+            })
+            .then(r => r.json())
+            .then(() => {
+                document.getElementById('mat-desc').value = '';
+                document.getElementById('mat-cant').value = '';
+                document.getElementById('mat-und').value = '';
+                document.getElementById('mat-des').value = '';
+                cargarMateriales();
+                actualizarDashboardDespuesDeAccion();
+            });
+        }
+        
+        function cargarMateriales() {
+            fetch('/api/todos_movimientos_materiales')
+                .then(r => r.json())
+                .then(d => {
+                    let t = document.getElementById('tabla-materiales');
+                    t.innerHTML = '';
+                    d.forEach(m => {
+                        let r = t.insertRow();
+                        r.insertCell().innerText = m.fecha;
+                        r.insertCell().innerText = m.hora;
+                        r.insertCell().innerHTML = `<span class="${m.movimiento === 'INGRESO' ? 'movimiento-ingreso' : 'movimiento-salida'}">${m.movimiento}</span>`;
+                        r.insertCell().innerText = m.descripcion;
+                        r.insertCell().innerText = m.cantidad;
+                        r.insertCell().innerText = m.unidad;
+                        r.insertCell().innerText = m.destino;
+                        
+                        let a = r.insertCell();
+                        a.innerHTML = `
+                            <button class="btn btn-small btn-info" onclick="editarMaterialCompleto(${m.id})">✏️ Editar Todo</button>
+                            <button class="btn btn-small btn-danger" onclick="eliminarMaterial(${m.id})">🗑️ Eliminar</button>
+                        `;
+                    });
+                });
+        }
+        
+        function editarMaterialCompleto(id) {
+            fetch(`/api/obtener_movimiento_material/${id}`)
+                .then(r => r.json())
+                .then(m => {
+                    if (m.error) {
+                        alert('Error al cargar el movimiento');
+                        return;
+                    }
+                    
+                    document.getElementById('edit-material-id').value = m.id;
+                    document.getElementById('edit-material-fecha').value = m.fecha;
+                    document.getElementById('edit-material-hora').value = m.hora;
+                    document.getElementById('edit-material-movimiento').value = m.movimiento;
+                    document.getElementById('edit-material-descripcion').value = m.descripcion;
+                    document.getElementById('edit-material-cantidad').value = m.cantidad;
+                    document.getElementById('edit-material-unidad').value = m.unidad;
+                    document.getElementById('edit-material-destino').value = m.destino;
+                    
+                    mostrarModalMaterial();
+                });
+        }
+        
+        function guardarEdicionMaterial() {
+            let datos = {
+                id: document.getElementById('edit-material-id').value,
+                fecha: document.getElementById('edit-material-fecha').value,
+                hora: document.getElementById('edit-material-hora').value,
+                movimiento: document.getElementById('edit-material-movimiento').value,
+                descripcion: document.getElementById('edit-material-descripcion').value,
+                cantidad: document.getElementById('edit-material-cantidad').value,
+                unidad: document.getElementById('edit-material-unidad').value,
+                destino: document.getElementById('edit-material-destino').value
+            };
+            
+            if (!datos.fecha || !datos.hora || !datos.descripcion) {
+                alert('Complete los campos obligatorios');
+                return;
+            }
+            
+            fetch('/api/actualizar_movimiento_material', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(datos)
+            })
+            .then(r => r.json())
+            .then(r => {
+                if (r.exito) {
+                    cerrarModalMaterial();
+                    cargarMateriales();
+                    actualizarDashboardDespuesDeAccion();
+                    alert('✅ Material actualizado correctamente');
+                } else {
+                    alert('❌ Error al actualizar');
+                }
+            });
+        }
+        
+        function eliminarMaterial(id) {
+            if (confirm('¿Está seguro de eliminar este material?')) {
+                fetch('/api/eliminar_movimiento_material', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: id })
+                })
+                .then(r => r.json())
+                .then(() => {
+                    cargarMateriales();
+                    actualizarDashboardDespuesDeAccion();
+                    alert('✅ Material eliminado correctamente');
+                });
+            }
+        }
+    </script>
+</body>
+</html>
